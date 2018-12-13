@@ -1,85 +1,52 @@
-FROM ubuntu:latest
-LABEL maintainer nickleefly <nickleefly@gmail.com>
+FROM alpine as base
 
-# Install Ubuntu and base software.
-RUN \
-  sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list && \
-  apt-get update && \
-  apt-get -y -qq upgrade && \
-  apt-get install -y -qq git wget build-essential zlib1g-dev libpcre3-dev git gcc g++ make && \
-  rm -rf /var/lib/apt/lists/*
+RUN apk update && apk upgrade && apk add gcc g++ make wget git file openssl-dev pcre-dev zlib-dev
+RUN git clone -b dev https://github.com/cuber/ngx_http_google_filter_module
+RUN git clone https://github.com/yaoweibin/ngx_http_substitutions_filter_module
 
-ENV NGINX_VERSION=1.15.7 PCRE_VERSION=8.42 OPENSSL_VERSION=1.1.0f ZLIB_VERSION=1.2.11
+RUN NGINX_VERSION=nginx-1.15.7&& wget http://nginx.org/download/${NGINX_VERSION}.tar.gz && tar zxf ${NGINX_VERSION}.tar.gz && cd ${NGINX_VERSION} && ls -lha && \
+./configure --with-http_v2_module --with-http_ssl_module --with-stream --with-stream_ssl_preread_module --sbin-path=/usr/local/sbin/nginx --prefix=/etc/nginx --conf-path=/etc/nginx/nginx.conf --http-log-path=/var/log/nginx/access.log --error-log-path=/var/log/nginx/error.log --pid-path=/var/run/nginx.pid \
+--without-select_module \
+--without-poll_module \
+--without-http_access_module \
+--without-http_auth_basic_module \
+--without-http_autoindex_module \
+--without-http_browser_module \
+--without-http_charset_module \
+--without-http_empty_gif_module \
+--without-http_fastcgi_module \
+--without-http_geo_module \
+--without-http_map_module \
+--without-http_memcached_module \
+--without-http_referer_module \
+--without-http_scgi_module \
+--without-http_split_clients_module \
+--without-http_ssi_module \
+--without-http_limit_req_module \
+--without-http_upstream_ip_hash_module \
+--without-http_upstream_keepalive_module \
+--without-http_upstream_least_conn_module \
+--without-http_userid_module \
+--without-http_uwsgi_module \
+--without-mail_imap_module \
+--without-mail_pop3_module \
+--without-mail_smtp_module \
+--add-module=/ngx_http_google_filter_module \
+--add-module=/ngx_http_substitutions_filter_module \
+&& \
+sed -i "s/-lpcre -lssl -lcrypto -lz/-static -lpcre -lssl -lcrypto -lz/g" objs/Makefile && make -j2 CFLAGS=-Os LDFLAGS=-static && make install && \
+strip -s /usr/local/sbin/nginx &&  rm -rf /etc/nginx/*.default
 
-# Get Source Code
-RUN \
-  wget "http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" && \
-  wget "https://ftp.pcre.org/pub/pcre/pcre-${PCRE_VERSION}.tar.gz" && \
-  wget "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" && \
-  wget "http://zlib.net/zlib-${ZLIB_VERSION}.tar.gz" && \
-  git clone https://github.com/cuber/ngx_http_google_filter_module && \
-  git clone https://github.com/yaoweibin/ngx_http_substitutions_filter_module && \
-  tar xzf nginx-${NGINX_VERSION}.tar.gz && \
-  tar xzf pcre-${PCRE_VERSION}.tar.gz && \
-  tar xzf openssl-${OPENSSL_VERSION}.tar.gz && \
-  tar xzf zlib-${ZLIB_VERSION}.tar.gz
-
-ADD ./nginx.service /etc/init.d/nginx
+FROM alpine
+MAINTAINER nickleefly <nickleefly@gmail.com>
+COPY --from=base /usr/local/sbin/nginx /usr/local/sbin/nginx
+COPY --from=base /etc/nginx /etc/nginx
+COPY --from=base /var/log/nginx /var/log/nginx
 ADD ./nginx.conf /etc/nginx/nginx.conf
+RUN ln -sf /dev/stdout /var/log/nginx/access.log && ln -sf /dev/stderr /var/log/nginx/error.log
 
-# Install Nginx
-RUN \
-  cd nginx-${NGINX_VERSION} && \
-  ./configure --prefix=/etc/nginx  \
-              --sbin-path=/usr/sbin/nginx  \
-              --conf-path=/etc/nginx/nginx.conf  \
-              --error-log-path=/var/log/nginx/error.log  \
-              --http-log-path=/var/log/nginx/access.log  \
-              --pid-path=/var/run/nginx.pid  \
-              --lock-path=/var/run/nginx.lock \
-              --http-client-body-temp-path=/var/cache/nginx/client_temp  \
-              --http-proxy-temp-path=/var/cache/nginx/proxy_temp  \
-              --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp  \
-              --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp  \
-              --http-scgi-temp-path=/var/cache/nginx/scgi_temp  \
-              --user=nginx  \
-              --group=nginx  \
-              --with-http_ssl_module  \
-              --with-http_realip_module  \
-              --with-http_addition_module  \
-              --with-http_sub_module  \
-              --with-http_dav_module  \
-              --with-http_flv_module  \
-              --with-http_mp4_module \
-              --with-http_gunzip_module  \
-              --with-http_gzip_static_module \
-              --with-http_random_index_module \
-              --with-http_secure_link_module  \
-              --with-http_stub_status_module  \
-              --with-http_auth_request_module  \
-              --with-threads  \
-              --with-stream  \
-              --with-stream_ssl_module  \
-              --with-http_slice_module  \
-              --with-mail  \
-              --with-mail_ssl_module  \
-              --with-file-aio  \
-              --with-http_v2_module  \
-              --with-ipv6  \
-              --with-pcre=../pcre-${PCRE_VERSION} \
-              --with-openssl=../openssl-${OPENSSL_VERSION}  \
-              --with-zlib=../zlib-${ZLIB_VERSION}  \
-              --add-module=../ngx_http_google_filter_module  \
-              --add-module=../ngx_http_substitutions_filter_module && \
-  make -j4 && \
-  make install && \
-  chmod +x /etc/init.d/nginx && \
-  /usr/sbin/update-rc.d -f nginx defaults && \
-  useradd --no-create-home nginx && \
-  sed -i -e 's/\r//g' /etc/init.d/nginx && \
-  mkdir -p /var/cache/nginx
-
-EXPOSE 80
+WORKDIR /etc/nginx
+EXPOSE 80 443
 
 # Run Nginx
 CMD ["nginx", "-g", "daemon off;"]

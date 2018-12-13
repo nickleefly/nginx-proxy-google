@@ -29,12 +29,16 @@ git clone https://github.com/nickleefly/nginx-proxy-google
 + Build an image from Dockerfile
 
 ```bash
-docker build -t="nginx-proxy-google" .
+docker build -t nickleefly/nginx-proxy-google .
 ```
 
 ## Run
 
 ```bash
 docker run -d -p <host-ip-port>:80 nginx-proxy-google
+```
+
+```bash
+docker -it --rm image-id bash
 ```
 
