@@ -35,7 +35,7 @@ docker build -t nickleefly/nginx-proxy-google .
 ## Run
 
 ```bash
-docker run -d -p <host-ip-port>:80 nginx-proxy-google
+docker run --restart always -d -p 80:80 -p 443:443 nickleefly/nginx-proxy-google --name nginx
 ```
 
 ```bash
