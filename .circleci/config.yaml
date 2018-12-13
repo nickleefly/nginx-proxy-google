@@ -20,7 +20,10 @@ jobs:
             mv /tmp/docker/* /usr/bin
 
     # build the application image
-    - run: docker build -t nginx-proxy-google .
+    - run:
+          name: Build Docker image
+          command: |
+            docker build -t nginx-proxy-google .
 
     - run:
         name: "Start Service and Check That it’s Running"
