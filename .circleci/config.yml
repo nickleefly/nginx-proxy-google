@@ -14,4 +14,4 @@ jobs:
       - run:
           name: "Start Service and Check That it’s Running"
           command: |
-            docker run -d -p 8080:80 nginx-proxy-google --name nginx
+            docker run -d -p 8080:80 --name nginx nginx-proxy-google
