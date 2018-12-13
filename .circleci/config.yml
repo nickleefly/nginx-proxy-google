@@ -15,4 +15,3 @@ jobs:
           name: "Start Service and Check That it’s Running"
           command: |
             docker run -d -p 8080:80 nginx-proxy-google --name nginx
-            docker exec nginx curl --retry 10 --retry-connrefused http://localhost:8080
