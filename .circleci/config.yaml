@@ -1,0 +1,12 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  override:
+    - docker info
+    - docker build -t nginx-proxy-google .
+
+test:
+  override:
+    - docker run -d -p 80:80 nginx-proxy-google; sleep 10
