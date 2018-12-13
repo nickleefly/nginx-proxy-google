@@ -6,7 +6,7 @@ jobs:
     - checkout
 
     - setup_remote_docker:   # (2)
-          docker_layer_caching: true # (3)
+        docker_layer_caching: true # (3)
 
     # use a primary image that already has Docker (recommended)
       # or install it during a build like we do here
@@ -21,9 +21,9 @@ jobs:
 
     # build the application image
     - run:
-          name: Build Docker image
-          command: |
-            docker build -t nginx-proxy-google .
+        name: Build Docker image
+        command: |
+          docker build -t nginx-proxy-google .
 
     - run:
         name: "Start Service and Check That it’s Running"
