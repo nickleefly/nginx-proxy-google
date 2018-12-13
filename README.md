@@ -4,7 +4,7 @@ Inspired by [ngx_http_google_filter_module](https://github.com/cuber/ngx_http_go
 
 ## Base Docker Image
 
-* [ubuntu](https://hub.docker.com/_/ubuntu/)
+* [alpine](https://hub.docker.com/_/alpine/)
 
 ## Usage
 
