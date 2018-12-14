@@ -37,8 +37,3 @@ docker build -t nickleefly/nginx-proxy-google .
 ```bash
 docker run --restart always -d -p 80:80 -p 443:443 --name nginx nickleefly/nginx-proxy-google
 ```
-
-```bash
-docker -it --rm image-id bash
-```
-

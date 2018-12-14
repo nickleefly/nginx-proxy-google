@@ -39,10 +39,12 @@ strip -s /usr/local/sbin/nginx &&  rm -rf /etc/nginx/*.default
 
 FROM alpine
 MAINTAINER nickleefly <nickleefly@gmail.com>
+
 COPY --from=base /usr/local/sbin/nginx /usr/local/sbin/nginx
 COPY --from=base /etc/nginx /etc/nginx
 COPY --from=base /var/log/nginx /var/log/nginx
-ADD ./nginx.conf /etc/nginx/nginx.conf
+
+COPY nginx /etc/nginx/
 RUN ln -sf /dev/stdout /var/log/nginx/access.log && ln -sf /dev/stderr /var/log/nginx/error.log
 
 WORKDIR /etc/nginx
