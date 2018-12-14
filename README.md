@@ -18,7 +18,7 @@ docker pull nickleefly/nginx-proxy-google
 
 ### Build the image by yourself
 
-+ Install [Docker](https://docs.docker.com/engine/installation/#installation).
++ Install [Docker](https://docs.docker.com/install/).
 
 + Clone this repo
 
