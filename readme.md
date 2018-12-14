@@ -37,3 +37,33 @@ docker build -t nickleefly/nginx-proxy-google .
 ```bash
 docker run --restart always -d -p 80:80 -p 443:443 --name nginx nickleefly/nginx-proxy-google
 ```
+
+
+### Custom google.conf
+
+[Example google.conf](nginx/conf.d/google.conf)
+
+```bash
+server {
+    listen 80;
+
+    server_name example.com;
+
+    location / {
+        google on;
+        google_scholar on;
+        google_language "en";
+    }
+
+    # 屏蔽spider
+    if ($http_user_agent ~* (baiduspider|360spider|haosouspider|googlebot|soso|bing|sogou|yahoo|sohu-search|yodao|YoudaoBot|robozilla|msnbot|MJ12bot|NHN|Twiceler)) {
+        return  403;
+    }
+}
+```
+
+```bash
+docker run --restart always -d -p 80:80 -p 443:443 \
+-v path/to/google.conf:/etc/nginx/conf.d/google.conf \
+--name nginx nickleefly/nginx-proxy-google
+```
