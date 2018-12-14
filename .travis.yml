@@ -1,0 +1,17 @@
+sudo: required
+
+services:
+    - docker
+
+before_install:
+    - docker build -t nginx-proxy-google .
+
+install:
+    - docker run -d -p 8080:80 --name nginx nginx-proxy-google
+
+script:
+    - curl -sSf http://localhost:8080 > /dev/null
+    - docker ps -a | grep healthy
+
+after_failure:
+    - timeout 3s
