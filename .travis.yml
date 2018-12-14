@@ -11,7 +11,4 @@ install:
 
 script:
     - curl -sSf http://localhost:8080 > /dev/null
-    - docker ps -a | grep healthy
 
-after_failure:
-    - timeout 3s
