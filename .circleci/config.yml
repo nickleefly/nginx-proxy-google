@@ -2,8 +2,12 @@ version: 2
 jobs:
   build:
     machine: true
+    docker:
+     - image: nickleefly/nginx-proxy-google
     steps:
       - checkout
+      - setup_remote_docker:
+         docker_layer_caching: true
 
       # build the application image
       - run:
