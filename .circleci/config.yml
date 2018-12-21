@@ -2,8 +2,6 @@ version: 2
 jobs:
   build:
     machine: true
-    docker:
-     - image: nickleefly/nginx-proxy-google
     steps:
       - checkout
       - setup_remote_docker:
